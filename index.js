@@ -1,13 +1,4 @@
-const path = require('path'),
-  log = require('mk-log'),
-  request = require('./lib/request-promise'),
-  fields = {
-    test: {
-      '100': 'API-Test',
-      '150': 'API-Test ohne Fake Ergebnis',
-      '200': 'Normaler Ablauf Kennzeichnung als Testaufruf'
-    }
-  },
+const request = require('./lib/request-promise'),
   baseURL = 'https://api.geo-real.it/API/wohnmarktanalyse'; // no trailing slash for list
 
 function WMAAPI(apikey) {
@@ -26,7 +17,7 @@ function WMAAPI(apikey) {
       let url = `${baseURL}/${id}`;
       return await request(options).get(url);
     } catch (err) {
-      log.error(err);
+      console.error(err);
     }
   }
 
@@ -39,10 +30,10 @@ function WMAAPI(apikey) {
         json: true
       };
       let result = await request(options).get(baseURL);
-      log.info('result', result);
+      console.info('result', result);
       return result;
     } catch (err) {
-      log.error(err);
+      console.error(err);
     }
   }
 
@@ -57,7 +48,7 @@ function WMAAPI(apikey) {
       let result = await request(options).post(baseURL);
       return result;
     } catch (err) {
-      log.error(err);
+      console.error(err);
     }
   }
 

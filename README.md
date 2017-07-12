@@ -1,2 +1,2 @@
 # Notice the double double dash
-yarn run test -- --[apikey] adf
+yarn run test -- --[apikey]
