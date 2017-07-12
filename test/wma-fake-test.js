@@ -1,11 +1,46 @@
 const
+  path = require('path'),
   tape = require('tape'),
+  fs = require('fs'),
   Arg = require('../lib/arg'),
   apikey = Arg('apikey'),
   WMAAPI = require('../index.js'),
   http = require('http'),
   port = 9631,
   httpShutdown = require('http-shutdown');
+
+function saveResult(req) {
+
+  return new Promise(function(resolve, reject) {
+
+    var data = [];
+
+    req.on('data', function(chunk) {
+      data.push(chunk);
+    }).on('end', function() {
+      //at this point data is an array of Buffers
+      //so Buffer.concat() can make us a new Buffer
+      //of all of them together
+      let
+        buffer = Buffer.concat(data),
+        resultPath = path.join(__dirname, '..', 'tmp', 'test.pdf');
+
+      fs.writeFile(resultPath, buffer, function(err) {
+
+        if (err) {
+          console.error(err);
+          reject(err);
+        }
+
+        return resolve(buffer);
+
+      });
+
+    });
+
+  });
+
+}
 
 tape('create fake task test with callback request', async function(t) {
 
@@ -36,21 +71,36 @@ tape('create fake task test with callback request', async function(t) {
 
     await wmaApi.createTask(taskParams);
 
-    let server = http.createServer(function(req, res) {
-      res.writeHead(200, {'content-type': 'text/plain'});
-      res.end('I have received your request and it was awesome.');
-      t.ok(req.connection.remoteAddress.match(/138\.201\.64\.199/));
+    let server = http.createServer(async function(req, res) {
+
       try {
-        server.shutdown(function() {
-          console.info('server is shutdown');
-        });
+
+        await saveResult(req);
+
       } catch(err) {
+
         console.error(err);
-        console.info('server is shutdown');
+
+      } finally {
+
+        res.writeHead(200, {'content-type': 'text/plain'});
+        res.end('I have received your request and it was awesome.');
+
+        t.ok(req.connection.remoteAddress.match(/138\.201\.64\.199/));
+        try {
+          server.shutdown(function() {
+            console.info('server is shutdown');
+          });
+        } catch(err) {
+          console.error(err);
+          console.info('server is not shutdown');
+        }
+
       }
+
     });
 
-      // adding shutdown ability
+    // adding shutdown ability
     server = httpShutdown(server);
 
     server.listen(port, function() {

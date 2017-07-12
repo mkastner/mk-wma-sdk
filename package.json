@@ -7,9 +7,9 @@
   "author": "John Galt",
   "license": "MIT",
   "scripts": {
-    "test:canary": "node test/wma-canary-test.js",
-    "test:fake": "node test/wma-fake-test.js",
-    "test:validation": "node test/wma-validation-test.js | tap-spec"
+    "test:canary": "NODE_ENV=test node test/wma-canary-test.js",
+    "test:fake": "NODE_ENV=test node test/wma-fake-test.js",
+    "test:validation": "NODE_ENV=test node test/wma-validation-test.js | tap-spec"
   },
   "devDependencies": {
     "http-shutdown": "^1.2.0",
