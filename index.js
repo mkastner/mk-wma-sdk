@@ -3,6 +3,10 @@ const request = require('./lib/request-promise'),
 
 function WMAAPI(apikey) {
 
+  if (!apikey) {
+    throw new Error('apikey as argument was expected, but not passed');
+  }
+
   async function getOne(id) {
     try {
       if (!id) {

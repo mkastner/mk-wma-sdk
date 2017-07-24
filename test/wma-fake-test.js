@@ -6,6 +6,9 @@ const
   apikey = Arg('apikey'),
   WMAAPI = require('../index.js'),
   http = require('http'),
+  express = require('express'),
+  bodyParser = require('body-parser'),
+  app = express(),
   port = 9631,
   httpShutdown = require('http-shutdown');
 
@@ -66,14 +69,54 @@ tape('create fake task test with callback request', async function(t) {
         objekt_typ: 57, // number
         objekt_wohnflaeche: 70, //number
         objekt_baujahr: '1950',
-        returnurl1: 'http://local.fmh.de:9631'
+        returnurl1: `http://local.fmh.de:${port}`
       };
 
-    await wmaApi.createTask(taskParams);
+    let createTaskResult = await wmaApi.createTask(taskParams);
+
+    console.log('createTaskResult', createTaskResult);
+
+    console.log('createTaskResult', createTaskResult.id);
+
+    let server = http.createServer(app);
+
+    app.server = httpShutdown(server);
+
+    app.use(bodyParser.urlencoded({ extended: true }));
+
+    app.post('/', function(req, res) {
+      console.log(req);
+      res.send('I have received your request and it was awesome.');
+      t.ok(req.connection.remoteAddress.match(/138\.201\.64\.199/));
+      app.server.shutdown();
+    });
+
+    app.get('/', function(req, res) {
+      console.log(req.body);
+      t.ok(req.body);
+      //res.writeHead(200, {'content-type': 'text/plain'});
+      res.send(200, 'I have received your request and it was awesome.');
+      app.server.shutdown();
+    });
+
+
+
+    app.server.listen(port, function() {
+      console.info('server running on port', port);
+
+    });
+
+    //await wmaApi.createTask(taskParams);
+
+    /*
 
     let server = http.createServer(async function(req, res) {
 
+
+
       try {
+
+        console.log('req', req);
 
         await saveResult(req);
 
@@ -103,9 +146,13 @@ tape('create fake task test with callback request', async function(t) {
     // adding shutdown ability
     server = httpShutdown(server);
 
+
+
     server.listen(port, function() {
       console.info('server running on port', port);
     });
+
+    */
 
   } catch (err) {
     console.error(err);

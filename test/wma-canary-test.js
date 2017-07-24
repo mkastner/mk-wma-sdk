@@ -31,12 +31,15 @@ tape('get list test', async function(t) {
 
   try {
 
-    t.plan(1);
+    t.plan(2);
 
     let
       wmaApi = WMAAPI(apikey),
       listResult = await wmaApi.getList();
+
     t.ok(listResult);
+
+    t.notOk(listResult.match('Authentifizierung erforderlich'), 'Authentication');
 
   } catch (err) {
     console.error(err);
