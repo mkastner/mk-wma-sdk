@@ -22,7 +22,7 @@
     "ajv": "^5.2.2",
     "ajv-i18n": "^2.1.0",
     "lodash": "^4.17.4",
-    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.2",
+    "mk-log": "https://github.com/mkastner/mk-log.git#v0.0.4",
     "request": "^2.81.0"
   }
 }
