@@ -7,14 +7,27 @@ const
   WMAAPI = require('../index.js'),
   http = require('http'),
   express = require('express'),
-  bodyParser = require('body-parser'),
+  multiparty = require('multiparty'),
   app = express(),
   port = 9631,
   httpShutdown = require('http-shutdown');
 
-function saveResult(req) {
+function saveResult(rawData) {
 
   return new Promise(function(resolve, reject) {
+
+    fs.writeFile(resultPath, buffer, function(err) {
+
+      if (err) {
+        console.error(err);
+        reject(err);
+      }
+
+      return resolve(buffer);
+
+    });
+
+    /*
 
     var data = [];
 
@@ -40,6 +53,8 @@ function saveResult(req) {
       });
 
     });
+
+  */
 
   });
 
@@ -74,6 +89,9 @@ tape('create fake task test with callback request', async function(t) {
 
     let createTaskResult = await wmaApi.createTask(taskParams);
 
+    let transactionId = createTaskResult.id;
+
+
     console.log('createTaskResult', createTaskResult);
 
     console.log('createTaskResult', createTaskResult.id);
@@ -82,18 +100,25 @@ tape('create fake task test with callback request', async function(t) {
 
     app.server = httpShutdown(server);
 
-    app.use(bodyParser.urlencoded({ extended: true }));
-
     app.post('/', function(req, res) {
-      console.log(req);
-      res.send('I have received your request and it was awesome.');
-      t.ok(req.connection.remoteAddress.match(/138\.201\.64\.199/));
-      app.server.shutdown();
+
+      let form = new multiparty.Form();
+
+      form.parse(req, function(err, fields, files) {
+
+        t.equal(`${transactionId}`, `${fields.transactionId[0]}`, 'must be same transaction id');
+        res.send('I have received your post and it was awesome.');
+        app.server.shutdown();
+
+      });
+
+
     });
 
     app.get('/', function(req, res) {
-      console.log(req.body);
-      t.ok(req.body);
+      console.log(req);
+      //t.ok(req.body);
+      t.ok(req);
       //res.writeHead(200, {'content-type': 'text/plain'});
       res.send(200, 'I have received your request and it was awesome.');
       app.server.shutdown();

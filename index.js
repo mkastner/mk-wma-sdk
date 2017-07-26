@@ -1,4 +1,5 @@
-const request = require('./lib/request-promise'),
+const
+  request = require('./lib/request-promise'),
   baseURL = 'https://api.geo-real.it/API/wohnmarktanalyse'; // no trailing slash for list
 
 function WMAAPI(apikey) {
